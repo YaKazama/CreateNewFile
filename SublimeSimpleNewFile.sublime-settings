@@ -6,7 +6,7 @@
     // "default": os.path.abspath(os.path.dirname(__file__))
     // 若输入的 文件路径 是绝对路径，则此参数无效
     // 上述关键字均未使用，则返回 "home"
-    "root": "project",
+    "root": "current",
 
     "enable_template": true,
     // "" or "current": os.path.dirname(window.active_view().file_name())
@@ -28,14 +28,14 @@
         "css"           : "example.tmpl",
     },
     "attrs": {
-        "author": "Ya Kazama",
+        "author": "ssnf",
         "email": "<example@ssnf.ssnf>",
         "version": "1.0.0",
         "link": "https://github.com/"
     },
     "date_format": "%Y-%m-%d %H:%M:%S",
-    "enable_project_variables": true,
-    "enable_file_variables_on_save": false,
+    "enable_project_variables": false,
+    "display_python_init_file": false,
 
     // 未定义，则设置为：Plain text
     "syntax": {

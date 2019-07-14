@@ -19,17 +19,23 @@ SETTINGS = "{}.sublime-settings".format(PACKAGE_NAME)
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 PACKAGES_PATH = sublime.packages_path()
 HOME_PATH = os.path.expanduser("~")
-IS_GTE_ST3 = int(sublime.version()[0]) >= 3
+IS_ST3 = int(sublime.version()) >= 3000
+PLATFORM = sublime.platform()
 PROJECT_EXTRACT_VARIABLES = [
     'file_path', 'file_base_name', 'file_name', 'packages', 'file_extension',
     'platform', 'file', 'folder'
 ]
 
 
-class SublimeSimpleNewFileCommand(sublime_plugin.WindowCommand):
+if not IS_ST3:
+    raise TypeError("Please Use sublime text 3")
+
+if PLATFORM not in ["linux", "osx"]:
+    raise TypeError("Please Use Linux or OSX")
+
+
+class SimpleNewFileCommand(sublime_plugin.WindowCommand):
     def run(self):
-        if sublime.platform() != "linux":
-            return
         self.opts = self.get_settings()
         self.window.show_input_panel(
             CAPTION, "", self._on_done, self._on_change, self._on_cancel
@@ -48,9 +54,9 @@ class SublimeSimpleNewFileCommand(sublime_plugin.WindowCommand):
         _current = os.path.dirname(_view) if _view else None
 
         if _root == "" or _root == "current":
-            p = _current if _current else p
+            p = _current if _current else HOME_PATH
         elif _root == "project":
-            p = _project if _project else p
+            p = _project if _project else HOME_PATH
         elif _root == "user":
             p = os.path.join(PACKAGES_PATH, "User")
         elif _root == "default":
@@ -120,14 +126,16 @@ class SublimeSimpleNewFileCommand(sublime_plugin.WindowCommand):
 
     def create_tab(self, fp, code):
         self.makedirs(fp)
-        _f = os.path.basename(fp)
-        _view = self.window.new_file()
-        _view.set_name(_f)
-        _view.settings().set("file_name", fp)
+        _view = self.window.open_file(fp)
+        # 控制是否需要添加模板内容到文件中，关闭文件后参数失效
+        _view.settings().set("new_file", True)
         return _view
 
-    def set_code(self, view, code):
-        view.window().run_command("insert_snippet", {"contents": code})
+    def set_code(self, _view, code):
+        """
+        参考SublimeSimpleNewFileEventListener.on_load
+        """
+        pass
 
     def set_syntax(self, view):
         view.set_syntax_file(self._syntax_path)
@@ -136,15 +144,23 @@ class SublimeSimpleNewFileCommand(sublime_plugin.WindowCommand):
         self.window.run_command("refresh_folder_list1")
 
     def _on_done(self, text):
+        global code
         code = ""
         # 组装路径
         fp = self.get_path(text, key="root")
-        # # 目录不存在时自动创建
-        # self.makedirs(fp)
         # 是否允许使用模板
         _tmpl = self.opts.get("enable_template", False)
         if _tmpl:
             code = self.get_code(fp)
+        # 判断是否是 __init__.py
+        _f = os.path.basename(fp)
+        _init_ = self.opts.get("display_python_init_file", False)
+        if _f == "__init__.py" and not _init_:
+            code = "#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n"
+            self.mknod(fp)
+            with open(fp, "w") as f:
+                f.write(code)
+            return
         # 创建tab（view）
         _view = self.create_tab(fp, code)
         # 设置语法
@@ -163,14 +179,8 @@ class SublimeSimpleNewFileCommand(sublime_plugin.WindowCommand):
         return
 
 
-# class SublimeSimpleNewFileEventListener(sublime_plugin.EventListener):
-
-#     def on_new(self, view):
-#         # self.opts = sublime.load_settings(SETTINGS)
-#         _folder = view.window().extract_variables().get("folder", "")
-#         # _file_name = view.settings().get("file_name", "")
-#         # _fp = os.path.join(_folder, unsaved_ids["file_name"])
-#         _s = view.substr(sublime.Region(0, view.size()))
-#         print(_s + "1111")
-#         # with open(_fp, "a") as f:
-#         #     f.write(_s)
+class SimpleNewFileEventListener(sublime_plugin.EventListener):
+    def on_load(self, view, new_file=False):
+        _flag = True if new_file else view.settings().get("new_file", False)
+        if _flag:
+            view.run_command("insert_snippet", {"contents": code})
