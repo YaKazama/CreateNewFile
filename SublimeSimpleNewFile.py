@@ -49,7 +49,10 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
             _root = self.opts.get("templates_path", "default")
         elif key == "root":
             _root = self.opts.get("root", "current")
-        _project = self.window.extract_variables()["folder"]
+        if "folder" in self.window.extract_variables().keys():
+            _project = self.window.extract_variables()["folder"]
+        else:
+            _project = HOME_PATH
         _view = self.window.active_view().file_name()
         _current = os.path.dirname(_view) if _view else None
 
