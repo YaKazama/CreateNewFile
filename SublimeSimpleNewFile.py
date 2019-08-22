@@ -54,7 +54,14 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
         _current = os.path.dirname(_view) if _view else None
 
         if _root == "" or _root == "current":
-            p = _current if _current else HOME_PATH
+            __root = self.opts.get("root_current_to_project_empty", False)
+            # p = _current if _current else HOME_PATH
+            if _current:
+                p = _current
+            else:
+                p = HOME_PATH
+                if __root:
+                    p = _project if _project else HOME_PATH
         elif _root == "project":
             p = _project if _project else HOME_PATH
         elif _root == "user":
@@ -86,7 +93,7 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
 
         format = self.opts.get("date_format", "%Y-%m-%d")
         date = datetime.datetime.now().strftime(format)
-        if not IS_GTE_ST3:
+        if not IS_ST3:
             _code = _code.de_code("utf8")
         _code = _code.replace('${date}', date)
 
@@ -184,3 +191,4 @@ class SimpleNewFileEventListener(sublime_plugin.EventListener):
         _flag = True if new_file else view.settings().get("new_file", False)
         if _flag:
             view.run_command("insert_snippet", {"contents": code})
+            view.run_command("save")
