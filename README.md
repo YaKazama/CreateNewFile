@@ -14,6 +14,9 @@ SimpleNewFile。
     // 若输入的 文件路径 是绝对路径，则此参数无效，返回绝对路径。
     // 上述关键字均未使用，则返回 "home"
     "root": "current",
+    // 当使用 "current" 时，若 window.active_view().file_name() 为空（没有已打开的文件），是否强制将关键字置为 "project"
+    // 注：使用 current 模式时，若未打开任何文件，则通过参数 root_current_to_project_empty 控制是否在当前项目中创建。可视为project的特殊情况。
+    "root_current_to_project_empty": true,
     // 控制是否启用 template 添加到文件头部
     "enable_template": true,
     // "" or "current"：当前 view 所在的路径
