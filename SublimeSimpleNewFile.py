@@ -167,6 +167,7 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
         _init_ = self.opts.get("display_python_init_file", False)
         if _f == "__init__.py" and not _init_:
             code = "#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n"
+            self.makedirs(fp)
             self.mknod(fp)
             with open(fp, "w") as f:
                 f.write(code)
