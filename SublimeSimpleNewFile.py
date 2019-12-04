@@ -62,7 +62,6 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
                 path = os.path.dirname(self.paths[0])
             else:
                 path = self.paths[0]
-            print(path)
             p = path if path else HOME_PATH
         else:
             if _root == "" or _root == "current":
