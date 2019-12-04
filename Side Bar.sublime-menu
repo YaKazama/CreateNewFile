@@ -1,0 +1,10 @@
+[
+    {
+        "id": "CreateNewFile", "caption": "-"
+    },
+    {
+        "caption": "CreateNewFile",
+        "command": "simple_new_file",
+        "args": { "paths": [] }
+    }
+]

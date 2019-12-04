@@ -35,7 +35,8 @@ if PLATFORM not in ["linux", "osx"]:
 
 
 class SimpleNewFileCommand(sublime_plugin.WindowCommand):
-    def run(self):
+    def run(self, paths):
+        self.paths = paths
         self.opts = self.get_settings()
         self.window.show_input_panel(
             CAPTION, "", self._on_done, self._on_change, self._on_cancel
@@ -56,26 +57,34 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
         _view = self.window.active_view().file_name()
         _current = os.path.dirname(_view) if _view else None
 
-        if _root == "" or _root == "current":
-            __root = self.opts.get("root_current_to_project_empty", False)
-            # p = _current if _current else HOME_PATH
-            if _current:
-                p = _current
+        if self.paths:
+            if not os.path.isdir(self.paths[0]):
+                path = os.path.dirname(self.paths[0])
+            else:
+                path = self.paths[0]
+            print(path)
+            p = path if path else HOME_PATH
+        else:
+            if _root == "" or _root == "current":
+                __root = self.opts.get("root_current_to_project_empty", False)
+                # p = _current if _current else HOME_PATH
+                if _current:
+                    p = _current
+                else:
+                    p = HOME_PATH
+                    if __root:
+                        p = _project if _project else HOME_PATH
+            elif _root == "project":
+                p = _project if _project else HOME_PATH
+            elif _root == "user":
+                p = os.path.join(PACKAGES_PATH, "User")
+            elif _root == "default":
+                if key == "templates_path":
+                    p = os.path.join(BASE_PATH, TMLP_DIR)
+                elif key == "root":
+                    p = BASE_PATH
             else:
                 p = HOME_PATH
-                if __root:
-                    p = _project if _project else HOME_PATH
-        elif _root == "project":
-            p = _project if _project else HOME_PATH
-        elif _root == "user":
-            p = os.path.join(PACKAGES_PATH, "User")
-        elif _root == "default":
-            if key == "templates_path":
-                p = os.path.join(BASE_PATH, TMLP_DIR)
-            elif key == "root":
-                p = BASE_PATH
-        else:
-            p = HOME_PATH
 
         return os.path.join(p, f) if not f.startswith("/") else f
 
