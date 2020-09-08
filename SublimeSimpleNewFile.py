@@ -25,6 +25,7 @@ PROJECT_EXTRACT_VARIABLES = [
     'file_path', 'file_base_name', 'file_name', 'packages', 'file_extension',
     'platform', 'file', 'folder'
 ]
+code = ""
 
 
 if not IS_ST3:
@@ -202,5 +203,6 @@ class SimpleNewFileEventListener(sublime_plugin.EventListener):
     def on_load(self, view, new_file=False):
         _flag = True if new_file else view.settings().get("new_file", False)
         if _flag:
-            view.run_command("insert_snippet", {"contents": code})
-            view.run_command("save")
+            if code:
+                view.run_command("insert_snippet", {"contents": code})
+                view.run_command("save")
