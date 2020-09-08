@@ -25,7 +25,6 @@ PROJECT_EXTRACT_VARIABLES = [
     'file_path', 'file_base_name', 'file_name', 'packages', 'file_extension',
     'platform', 'file', 'folder'
 ]
-code = ""
 
 
 if not IS_ST3:
@@ -42,6 +41,8 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
         self.window.show_input_panel(
             CAPTION, "", self._on_done, self._on_change, self._on_cancel
         )
+        self._syntax_key = DFT_SYNTAX_KEY
+        self._syntax_path = DFT_SYNTAX_PATH
 
     def get_settings(self):
         return sublime.load_settings(SETTINGS)
@@ -124,8 +125,6 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
 
     def get_code(self, f):
         _code = ""
-        self._syntax_key = DFT_SYNTAX_KEY
-        self._syntax_path = DFT_SYNTAX_PATH
         _templates = self.opts.get("templates", {})
         _extension = [x for x in f.split(".") if x != ""][-1].strip(" ")
         _syntax = self.opts.get(KEY_SYNTAX, {})
@@ -160,7 +159,7 @@ class SimpleNewFileCommand(sublime_plugin.WindowCommand):
         view.set_syntax_file(self._syntax_path)
 
     def refresh_sidebar(self):
-        self.window.run_command("refresh_folder_list1")
+        self.window.run_command("refresh_folder_list")
 
     def _on_done(self, text):
         global code
@@ -203,6 +202,5 @@ class SimpleNewFileEventListener(sublime_plugin.EventListener):
     def on_load(self, view, new_file=False):
         _flag = True if new_file else view.settings().get("new_file", False)
         if _flag:
-            if code:
-                view.run_command("insert_snippet", {"contents": code})
-                view.run_command("save")
+            view.run_command("insert_snippet", {"contents": code})
+            view.run_command("save")
